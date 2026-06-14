@@ -89,7 +89,8 @@ export function useCreateStaff() {
         // fonction non déployée / indisponible → repli ci-dessous
       }
 
-      // 2) Repli côté client
+      // 2) Repli côté client (fonctionne avec une adresse e-mail réelle et si
+      //    « Confirm email » est désactivé ; échoue sur les domaines fictifs).
       const password = generatePassword()
       const tmp = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
         auth: { storageKey: 'jokko-temp-signup', persistSession: false, autoRefreshToken: false },
@@ -99,8 +100,13 @@ export function useCreateStaff() {
         password,
         options: { data: { first_name: input.first_name, last_name: input.last_name } },
       })
-      if (error) throw error
-      if (!data.user) throw new Error('Compte non créé.')
+      if (error || !data.user) {
+        throw new Error(
+          'La création directe a échoué (' +
+            (error?.message ?? 'compte non créé') +
+            '). Déployez la fonction « admin-users » pour créer des comptes avec un domaine interne, ou utilisez une adresse e-mail réelle.',
+        )
+      }
 
       const { error: pErr } = await supabase.from('profiles').insert({
         auth_id: data.user.id,

@@ -92,17 +92,68 @@
     }
   }
 
+  /* Lueur cardiaque synchronisée au battement */
+  --animate-heart-glow: heart-glow 1.1s ease-in-out infinite;
+  @keyframes heart-glow {
+    0%,
+    100% {
+      opacity: 0.12;
+      transform: scale(0.9);
+    }
+    14% {
+      opacity: 0.55;
+      transform: scale(1.05);
+    }
+    45% {
+      opacity: 0.22;
+      transform: scale(0.95);
+    }
+    58% {
+      opacity: 0.38;
+      transform: scale(1);
+    }
+  }
+
   /* Respiration pulmonaire lente */
-  --animate-lung: lung 4s ease-in-out infinite;
+  --animate-lung: lung 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   @keyframes lung {
     0%,
     100% {
-      transform: scaleY(0.94) scaleX(0.97);
-      opacity: 0.85;
+      transform: scaleY(0.93) scaleX(0.97);
     }
     50% {
-      transform: scaleY(1.06) scaleX(1.03);
-      opacity: 1;
+      transform: scaleY(1.07) scaleX(1.035);
+    }
+  }
+
+  /* Diaphragme qui descend à l'inspiration */
+  --animate-diaphragm: diaphragm 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  @keyframes diaphragm {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(3px);
+    }
+  }
+
+  /* Flux d'air le long de la trachée */
+  --animate-airflow: airflow 4.2s ease-in-out infinite;
+  @keyframes airflow {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    30% {
+      opacity: 0.9;
+    }
+    70% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(10px);
     }
   }
 }
