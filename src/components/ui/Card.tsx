@@ -1,17 +1,18 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { cn } from '@/lib/cn'
+import { Card as ShadcnCard } from '@/components/shadcn/card'
+import { cn } from '@/lib/utils'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /** Effet de survol (légère élévation). */
   hoverable?: boolean
 }
 
+/** Adaptateur : conteneur = Card shadcn (tokens), espacement géré par CardHeader/CardBody. */
 export function Card({ className, hoverable, ...props }: CardProps) {
   return (
-    <div
+    <ShadcnCard
       className={cn(
-        'rounded-[var(--radius-card)] border border-slate-200 bg-white shadow-[var(--shadow-card)] dark:border-garde-bord dark:bg-garde-surface',
-        hoverable && 'transition hover:shadow-[var(--shadow-card-hover)]',
+        'gap-0 rounded-[var(--radius-card)] py-0 shadow-[var(--shadow-card)]',
+        hoverable && 'transition-shadow hover:shadow-[var(--shadow-card-hover)]',
         className,
       )}
       {...props}
@@ -33,10 +34,8 @@ export function CardHeader({
   return (
     <div className={cn('flex items-start justify-between gap-3 px-5 pt-5', className)}>
       <div className="min-w-0">
-        <h3 className="font-display text-[15px] font-semibold text-slate-900 dark:text-slate-100">
-          {title}
-        </h3>
-        {subtitle && <p className="mt-0.5 text-[13px] text-slate-500 dark:text-slate-400">{subtitle}</p>}
+        <h3 className="font-display text-[15px] font-semibold text-card-foreground">{title}</h3>
+        {subtitle && <p className="mt-0.5 text-[13px] text-muted-foreground">{subtitle}</p>}
       </div>
       {action}
     </div>

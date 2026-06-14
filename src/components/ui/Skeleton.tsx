@@ -1,11 +1,12 @@
-import { cn } from '@/lib/cn'
+import { Skeleton as ShadcnSkeleton } from '@/components/shadcn/skeleton'
+import { cn } from '@/lib/utils'
 import { Card } from './Card'
 
+/** Adaptateur : Skeleton shadcn. */
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-md bg-slate-200/70 dark:bg-white/10', className)} />
+  return <ShadcnSkeleton className={className} />
 }
 
-/** Squelette d'une carte de statistique (chiffre clé). */
 export function StatCardSkeleton() {
   return (
     <Card className="p-5">
@@ -16,7 +17,6 @@ export function StatCardSkeleton() {
   )
 }
 
-/** Squelette de lignes de table. */
 export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: number }) {
   return (
     <div className="space-y-2.5">
@@ -31,7 +31,6 @@ export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: nu
   )
 }
 
-/** Squelette d'une grille de cartes. */
 export function CardGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

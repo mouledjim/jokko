@@ -1,13 +1,19 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/cn'
+import {
+  Table as ShadcnTable,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/shadcn/table'
+import { cn } from '@/lib/utils'
 
 export interface Column<T> {
   key: string
   header: ReactNode
-  /** Rendu d'une cellule. */
   cell: (row: T) => ReactNode
   className?: string
-  /** Cache la colonne sous le point de rupture md (mobile). */
   hideOnMobile?: boolean
   align?: 'left' | 'right' | 'center'
 }
@@ -22,54 +28,45 @@ interface TableProps<T> {
 
 const ALIGN = { left: 'text-left', right: 'text-right', center: 'text-center' }
 
+/** Adaptateur : conserve l'API générique, rend une Table shadcn. */
 export function Table<T>({ columns, data, rowKey, onRowClick, className }: TableProps<T>) {
   return (
-    <div className={cn('overflow-x-auto', className)}>
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-slate-200 dark:border-garde-bord">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  'px-3 py-2.5 text-[12px] font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400',
-                  ALIGN[col.align ?? 'left'],
-                  col.hideOnMobile && 'hidden md:table-cell',
-                  col.className,
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr
-              key={rowKey(row)}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
+    <ShadcnTable className={className}>
+      <TableHeader>
+        <TableRow>
+          {columns.map((col) => (
+            <TableHead
+              key={col.key}
               className={cn(
-                'border-b border-slate-100 transition last:border-0 dark:border-garde-bord/60',
-                onRowClick && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.03]',
+                'text-[12px] font-semibold tracking-wide text-muted-foreground uppercase',
+                ALIGN[col.align ?? 'left'],
+                col.hideOnMobile && 'hidden md:table-cell',
+                col.className,
               )}
             >
-              {columns.map((col) => (
-                <td
-                  key={col.key}
-                  className={cn(
-                    'px-3 py-3 text-slate-700 dark:text-slate-200',
-                    ALIGN[col.align ?? 'left'],
-                    col.hideOnMobile && 'hidden md:table-cell',
-                    col.className,
-                  )}
-                >
-                  {col.cell(row)}
-                </td>
-              ))}
-            </tr>
+              {col.header}
+            </TableHead>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.map((row) => (
+          <TableRow
+            key={rowKey(row)}
+            onClick={onRowClick ? () => onRowClick(row) : undefined}
+            className={cn(onRowClick && 'cursor-pointer')}
+          >
+            {columns.map((col) => (
+              <TableCell
+                key={col.key}
+                className={cn(ALIGN[col.align ?? 'left'], col.hideOnMobile && 'hidden md:table-cell', col.className)}
+              >
+                {col.cell(row)}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </ShadcnTable>
   )
 }
