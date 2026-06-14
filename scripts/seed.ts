@@ -108,6 +108,7 @@ async function wipe() {
     'transfer_requests',
     'notifications',
     'audit_logs',
+    'bed_snapshots',
     'beds',
     'equipment',
     'facility_services',
@@ -429,6 +430,49 @@ async function main() {
     }
   }
   await insertRows('equipment', equipmentInserts)
+
+  // ——— Historique d'occupation (30 jours, instantané quotidien) ———
+  console.log("→ Historique d'occupation…")
+  const serviceIdToSlug: Record<string, string> = {}
+  for (const f of FACILITIES) for (const sp of f.services) serviceIdToSlug[serviceIdByKey[`${f.slug}:${sp}`]] = f.slug
+  const facStats = new Map<string, { total: number; out: number; occ: number }>()
+  for (const b of bedInserts) {
+    const slug = serviceIdToSlug[b.facility_service_id]
+    const s = facStats.get(slug) ?? { total: 0, out: 0, occ: 0 }
+    s.total += 1
+    if (b.status === 'hors_service') s.out += 1
+    else if (b.status !== 'libre') s.occ += 1
+    facStats.set(slug, s)
+  }
+  const snapshots: {
+    facility_id: string
+    captured_at: string
+    beds_total: number
+    beds_free: number
+    beds_occupied: number
+    occupancy_rate: number
+  }[] = []
+  for (const f of FACILITIES) {
+    const s = facStats.get(f.slug)
+    if (!s) continue
+    const operational = Math.max(1, s.total - s.out)
+    const baseOcc = s.occ / operational
+    for (let d = 30; d >= 1; d--) {
+      const day = new Date(now - d * 86_400_000)
+      day.setHours(8 + randInt(0, 2), randInt(0, 59), 0, 0)
+      const occRate = Math.min(0.99, Math.max(0.5, baseOcc + (rng() - 0.5) * 0.16))
+      const occupied = Math.round(operational * occRate)
+      snapshots.push({
+        facility_id: facilityIdBySlug[f.slug],
+        captured_at: day.toISOString(),
+        beds_total: s.total,
+        beds_free: Math.max(0, operational - occupied),
+        beds_occupied: occupied,
+        occupancy_rate: Math.round(occRate * 100),
+      })
+    }
+  }
+  await insertRows('bed_snapshots', snapshots)
 
   // ——— Transferts ———
   console.log('→ Transferts (timelines, notifications)…')

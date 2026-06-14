@@ -39,6 +39,7 @@ const NationalFacilitiesPage = lazy(() => import('@/pages/national/NationalFacil
 const NationalUsersPage = lazy(() => import('@/pages/national/NationalUsersPage'))
 const NationalRegionsPage = lazy(() => import('@/pages/national/NationalRegionsPage'))
 const AuditPage = lazy(() => import('@/pages/national/AuditPage'))
+const InteropPage = lazy(() => import('@/pages/national/InteropPage'))
 const NationalSettingsPage = lazy(() => import('@/pages/national/NationalSettingsPage'))
 
 function PublicSuspense({ children }: { children: React.ReactNode }) {
@@ -116,6 +117,7 @@ export function AppRouter() {
             <Route path="etablissements" element={<NationalFacilitiesPage />} />
             <Route path="utilisateurs" element={<NationalUsersPage />} />
             <Route path="regions" element={<NationalRegionsPage />} />
+            <Route path="interop" element={<InteropPage />} />
             <Route path="parametres" element={<NationalSettingsPage />} />
             <Route path="profil" element={<ProfilePage />} />
           </Route>

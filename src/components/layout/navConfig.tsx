@@ -11,6 +11,7 @@ import {
   Users,
   FileClock,
   Settings,
+  Webhook,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { UserRole } from '@/types/db'
@@ -90,6 +91,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
         { label: 'Établissements', to: '/national/etablissements', icon: Building2 },
         { label: 'Utilisateurs', to: '/national/utilisateurs', icon: Users },
         { label: 'Régions', to: '/national/regions', icon: Map },
+        { label: 'Interopérabilité', to: '/national/interop', icon: Webhook },
         { label: 'Paramètres', to: '/national/parametres', icon: Settings },
       ],
     },

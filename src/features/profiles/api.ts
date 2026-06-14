@@ -68,9 +68,10 @@ export interface CreateStaffInput {
 }
 
 /**
- * Crée un compte (médecin ou admin hôpital). Utilise un client Supabase JETABLE
- * pour le signUp afin de ne pas remplacer la session de l'administrateur courant,
- * puis insère le profil via le client principal (autorisé par la RLS).
+ * Crée un compte (médecin ou admin hôpital).
+ * Voie privilégiée : Edge Function « admin-users » (service_role côté serveur).
+ * Repli si la fonction n'est pas déployée : client Supabase JETABLE pour le
+ * signUp (sans remplacer la session admin) + insertion du profil via la RLS.
  * Le mot de passe initial généré est renvoyé pour affichage unique.
  */
 export function useCreateStaff() {
@@ -78,6 +79,17 @@ export function useCreateStaff() {
   const toast = useToast()
   return useMutation({
     mutationFn: async (input: CreateStaffInput): Promise<{ password: string }> => {
+      // 1) Edge Function (recommandé)
+      try {
+        const { data, error } = await supabase.functions.invoke('admin-users', {
+          body: { action: 'create', ...input },
+        })
+        if (!error && data?.password) return { password: data.password as string }
+      } catch {
+        // fonction non déployée / indisponible → repli ci-dessous
+      }
+
+      // 2) Repli côté client
       const password = generatePassword()
       const tmp = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
         auth: { storageKey: 'jokko-temp-signup', persistSession: false, autoRefreshToken: false },
@@ -107,5 +119,27 @@ export function useCreateStaff() {
       void qc.invalidateQueries({ queryKey: ['profiles'] })
     },
     onError: (e) => toast.error('Création impossible', e.message),
+  })
+}
+
+/**
+ * Réinitialise le mot de passe d'un compte via l'Edge Function (service_role).
+ * Nécessite que la fonction « admin-users » soit déployée.
+ */
+export function useResetPassword() {
+  const toast = useToast()
+  return useMutation({
+    mutationFn: async (profileId: string): Promise<{ password: string }> => {
+      const { data, error } = await supabase.functions.invoke('admin-users', {
+        body: { action: 'reset_password', profile_id: profileId },
+      })
+      if (error || !data?.password) {
+        throw new Error(
+          'Réinitialisation indisponible. Déployez la fonction « admin-users » (voir README).',
+        )
+      }
+      return { password: data.password as string }
+    },
+    onError: (e) => toast.error('Réinitialisation impossible', e.message),
   })
 }

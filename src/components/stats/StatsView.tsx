@@ -23,6 +23,7 @@ import { StatCardSkeleton, Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
 import { useTransfers } from '@/features/transfers/api'
+import { useOccupancyHistory } from '@/features/stats/api'
 import { formatDelay } from '@/lib/format'
 import { STATUS_LABEL } from '@/lib/roles'
 import type { TransferStatus } from '@/types/db'
@@ -50,8 +51,18 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   )
 }
 
-export function StatsView({ title, subtitle }: { title: string; subtitle: string }) {
+export function StatsView({
+  title,
+  subtitle,
+  occupancyFacilityIds,
+}: {
+  title: string
+  subtitle: string
+  /** Établissements pour l'occupation historique ; undefined = national. */
+  occupancyFacilityIds?: string[]
+}) {
   const transfers = useTransfers({ limit: 1000 })
+  const occupancy = useOccupancyHistory(occupancyFacilityIds)
   const data = transfers.data ?? []
 
   const stats = useMemo(() => {
@@ -128,6 +139,33 @@ export function StatsView({ title, subtitle }: { title: string; subtitle: string
         <Card className="mt-6 p-2"><EmptyState title="Aucune donnée" description="Aucun transfert sur la période pour générer des statistiques." /></Card>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Card className="lg:col-span-2">
+            <CardHeader title="Occupation des lits — historique" subtitle="Taux d'occupation moyen, 30 derniers jours" />
+            <CardBody>
+              {occupancy.isLoading ? (
+                <Skeleton className="h-[240px] w-full" />
+              ) : (occupancy.data ?? []).length === 0 ? (
+                <p className="py-16 text-center text-sm text-slate-400">Aucun historique d'occupation disponible.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={240}>
+                  <AreaChart data={occupancy.data} margin={{ left: -20, right: 8, top: 8 }}>
+                    <defs>
+                      <linearGradient id="occgrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#D97706" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="#D97706" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} interval={4} tickLine={false} axisLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={32} unit="%" />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Area type="monotone" dataKey="occupancy" name="Occupation (%)" stroke="#D97706" strokeWidth={2} fill="url(#occgrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </CardBody>
+          </Card>
+
           <Card className="lg:col-span-2">
             <CardHeader title="Évolution des transferts" subtitle="30 derniers jours" />
             <CardBody>

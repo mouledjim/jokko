@@ -31,6 +31,9 @@ Jokko Santé est un **module de coordination complémentaire** de l'existant nat
 - **Mode hors-ligne** : cache de lecture persistant, file d'attente d'écriture des lits rejouée automatiquement au retour du réseau, bandeau global et badges « en attente de synchro ».
 - **Transferts** : formulaire en 3 étapes avec suggestions intelligentes de destination, acceptation/refus chronométré, timeline immuable, mini-carte avec ambulance animée, notifications temps réel.
 - **4 espaces par rôle** : médecin, admin hôpital, admin régional, super-admin (MSAS) — chacun avec ses tableaux de bord, statistiques (Recharts), et outils d'administration.
+- **Statistiques avec historique d'occupation réel** : instantanés quotidiens des lits (table `bed_snapshots`) → courbes d'occupation historiques, en plus des analyses de transferts (Recharts).
+- **Interopérabilité HL7 FHIR** : API standard exposant les disponibilités sous forme de *Bundle FHIR R4* (ressources `Location`), consommable par le DPU / DHIS2 — avec une page de supervision dédiée.
+- **Gestion des comptes côté serveur** : création et réinitialisation de mot de passe via une **Edge Function** (clé `service_role` côté serveur), avec repli côté client si la fonction n'est pas déployée.
 - **Conformité** : RLS « deny by default » sur 100 % des tables, journal d'audit complet, anonymisation des données patient.
 - **PWA installable**, **mode Garde** (sombre) pour les gardes de nuit, **accessibilité** (focus, labels, contrastes AA, `prefers-reduced-motion`).
 
@@ -162,11 +165,28 @@ scripts/        migrate.ts, seed.ts, seed-data.ts, e2e-*.mjs
 
 ---
 
-## Pistes d'amélioration
+## Interopérabilité & Edge Functions
 
-- **Création de comptes** : passer par une Edge Function Supabase (service_role côté serveur) pour gérer la réinitialisation de mot de passe et fiabiliser l'envoi d'identifiants.
-- **Historique d'occupation** : stocker des instantanés périodiques des lits pour des courbes d'occupation réellement historiques (les statistiques actuelles s'appuient sur les transferts).
-- **Interopérabilité HL7 FHIR** : exposer une API de synchronisation des disponibilités avec le DPU / DHIS2.
+**API FHIR** — fonction Postgres `fhir_availability()` exposée via PostgREST :
+```
+POST {VITE_SUPABASE_URL}/rest/v1/rpc/fhir_availability
+```
+Retourne un *Bundle FHIR R4* de ressources `Location` (disponibilité par établissement et par service). Page de supervision : **/national/interop**.
+
+**Gestion des comptes (Edge Function)** — le code de la fonction est dans `supabase/functions/admin-users/`. Pour activer la création/réinitialisation de comptes côté serveur (recommandé) :
+```bash
+npx supabase login                # nécessite un access token Supabase
+npx supabase functions deploy admin-users --project-ref <project-ref>
+```
+`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont injectés automatiquement dans la fonction. Tant qu'elle n'est pas déployée, l'application crée les comptes côté client (fonctionne si « Confirm email » est désactivé dans le projet).
+
+**Historique d'occupation** — la fonction `capture_bed_snapshots()` enregistre un instantané ; planifiez-la (toutes les 6 h) avec pg_cron si l'extension est activée, sinon appelez-la via une tâche planifiée. Le seed génère 30 jours d'historique pour la démo.
+
+## Pistes d'amélioration ultérieures
+
+- **Authentification forte** (2FA) pour les comptes administrateurs et journalisation des connexions.
+- **Notifications push / SMS** pour les transferts critiques (au-delà des notifications in-app).
+- **Tableau de bord prédictif** : anticipation des tensions à partir de l'historique d'occupation.
 
 ---
 

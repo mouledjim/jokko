@@ -13,7 +13,7 @@ import { Table, type Column } from '@/components/ui/Table'
 import { TableSkeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/feedback/ErrorState'
-import { useProfiles, useToggleProfileActive, useCreateStaff, type ProfileRow } from '@/features/profiles/api'
+import { useProfiles, useToggleProfileActive, useCreateStaff, useResetPassword, type ProfileRow } from '@/features/profiles/api'
 import { useSpecialties } from '@/features/reference/api'
 import { ROLE_LABEL } from '@/lib/roles'
 import { initials } from '@/lib/format'
@@ -34,8 +34,9 @@ export default function AdminPersonnelPage() {
   const specialties = useSpecialties()
   const toggle = useToggleProfileActive()
   const createStaff = useCreateStaff()
+  const resetPw = useResetPassword()
   const [open, setOpen] = useState(false)
-  const [created, setCreated] = useState<{ email: string; password: string } | null>(null)
+  const [created, setCreated] = useState<{ who: string; password: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormValues>({ defaultValues: { role: 'medecin' } })
   const role = watch('role')
@@ -57,8 +58,13 @@ export default function AdminPersonnelPage() {
     })
     setOpen(false)
     reset({ role: 'medecin' })
-    setCreated({ email: v.email, password: res.password })
+    setCreated({ who: v.email, password: res.password })
   })
+
+  const doReset = async (p: ProfileRow) => {
+    const res = await resetPw.mutateAsync(p.id)
+    setCreated({ who: `${p.first_name} ${p.last_name}`, password: res.password })
+  }
 
   const columns: Column<ProfileRow>[] = [
     {
@@ -80,9 +86,14 @@ export default function AdminPersonnelPage() {
       header: '',
       align: 'right',
       cell: (p) => (
-        <Button variant="ghost" size="sm" onClick={() => toggle.mutate({ id: p.id, is_active: !p.is_active })}>
-          {p.is_active ? 'Désactiver' : 'Activer'}
-        </Button>
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => doReset(p)} loading={resetPw.isPending}>
+            Réinit. mdp
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => toggle.mutate({ id: p.id, is_active: !p.is_active })}>
+            {p.is_active ? 'Désactiver' : 'Activer'}
+          </Button>
+        </div>
       ),
     },
   ]
@@ -146,7 +157,7 @@ export default function AdminPersonnelPage() {
       >
         <p className="text-sm text-slate-600 dark:text-slate-300">Communiquez ces identifiants à la personne concernée. Le mot de passe ne sera plus affiché.</p>
         <div className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-          <p className="text-[13px]"><span className="text-slate-400">Email :</span> <span className="font-medium">{created?.email}</span></p>
+          <p className="text-[13px]"><span className="text-slate-400">Compte :</span> <span className="font-medium">{created?.who}</span></p>
           <div className="flex items-center justify-between gap-2">
             <p className="text-[13px]"><span className="text-slate-400">Mot de passe :</span> <span className="font-mono font-semibold">{created?.password}</span></p>
             <Button variant="ghost" size="sm" onClick={() => { if (created) { navigator.clipboard?.writeText(created.password); setCopied(true); toast.success('Mot de passe copié') } }}>
