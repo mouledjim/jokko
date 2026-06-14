@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/sora';
+
+/* Mode Garde (sombre) piloté par la classe .dark sur <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* ——— Palette « précision chirurgicale » ——— */
+  /* Teal profond des tenues de bloc opératoire : primaire (boutons, liens, actifs) */
+  --color-bloc: #0b5e59;
+  --color-bloc-fonce: #084744;
+  /* Accents, hover, tracé ECG */
+  --color-bloc-clair: #14b8a6;
+  /* Bleu-noir : textes forts, fond du mode nuit */
+  --color-garde: #0f172a;
+  /* Surfaces du mode nuit */
+  --color-garde-surface: #16202e;
+  --color-garde-bord: #243349;
+  /* Fond clair des pages */
+  --color-gaze: #f6f8f8;
+  /* Réservé EXCLUSIVEMENT à « critique » et aux alertes */
+  --color-vital: #dc2626;
+  /* « Urgent », tensions */
+  --color-triage: #d97706;
+  /* « Stable », disponibilités */
+  --color-constante: #16a34a;
+
+  /* ——— Typographie ——— */
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Sora Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* ——— Surfaces ——— */
+  --radius-card: 15px;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.05), 0 6px 20px rgb(15 23 42 / 0.05);
+  --shadow-card-hover: 0 2px 4px rgb(15 23 42 / 0.06), 0 12px 32px rgb(15 23 42 / 0.09);
+
+  /* ——— Animations signature ——— */
+  --animate-ecg-draw: ecg-draw 2.6s linear infinite;
+  --animate-pulse-vital: pulse-vital 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-breathe: breathe 3.2s ease-in-out infinite;
+
+  @keyframes ecg-draw {
+    0% {
+      stroke-dashoffset: 240;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes pulse-vital {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(220 38 38 / 0.45);
+    }
+    50% {
+      box-shadow: 0 0 0 7px rgb(220 38 38 / 0);
+    }
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.25);
+    }
+  }
+
+  /* Battement cardiaque — cycle systole/diastole ~1,1 s, lueur au pic */
+  --animate-heartbeat: heartbeat 1.1s ease-in-out infinite;
+  @keyframes heartbeat {
+    0%,
+    100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 0 rgb(20 184 166 / 0));
+    }
+    15% {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 6px rgb(20 184 166 / 0.55));
+    }
+    30% {
+      transform: scale(1);
+    }
+    45% {
+      transform: scale(1.04);
+    }
+    60% {
+      transform: scale(1);
+    }
+  }
+
+  /* Respiration pulmonaire lente */
+  --animate-lung: lung 4s ease-in-out infinite;
+  @keyframes lung {
+    0%,
+    100% {
+      transform: scaleY(0.94) scaleX(0.97);
+      opacity: 0.85;
+    }
+    50% {
+      transform: scaleY(1.06) scaleX(1.03);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-gaze font-sans text-slate-900 dark:bg-garde dark:text-slate-100;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-[-0.01em];
+  }
+
+  /* Focus clavier visible partout (accessibilité AA) */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-bloc-clair;
+  }
+
+  ::selection {
+    background-color: var(--color-bloc-clair);
+    color: white;
+  }
+}
+
+/* Animations décoratives coupées si l'utilisateur le demande */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

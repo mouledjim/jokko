@@ -1,0 +1,19 @@
+# Dependances
+node_modules/
+
+# Build
+dist/
+dev-dist/
+*.tsbuildinfo
+
+# Environnement — jamais commite
+.env
+.env.*
+!.env.example
+
+# Divers
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
