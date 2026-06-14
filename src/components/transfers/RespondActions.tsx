@@ -1,10 +1,19 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import confetti from 'canvas-confetti'
 import { Check, X } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Textarea, Select } from '@/components/ui/Field'
 import { useTransferAction } from '@/features/transfers/api'
+import type { TransferSeverity } from '@/types/db'
+
+/** Salve de confettis (teal / vital) pour une acceptation critique. */
+function celebrate() {
+  const opts = { spread: 70, ticks: 120, gravity: 0.9, scalar: 0.9, colors: ['#0B5E59', '#14B8A6', '#5eead4', '#DC2626', '#ffffff'] }
+  confetti({ ...opts, particleCount: 70, origin: { x: 0.3, y: 0.7 } })
+  confetti({ ...opts, particleCount: 70, origin: { x: 0.7, y: 0.7 } })
+}
 
 const REFUSAL_REASONS = [
   'Aucun lit disponible dans le service',
@@ -17,13 +26,16 @@ const REFUSAL_REASONS = [
 export function RespondActions({
   transferId,
   serviceName,
+  severity,
   onDone,
 }: {
   transferId: string
   serviceName: string
+  severity?: TransferSeverity
   onDone?: () => void
 }) {
   const action = useTransferAction()
+  const reduce = useReducedMotion()
   const [accepting, setAccepting] = useState(false)
   const [refusing, setRefusing] = useState(false)
   const [reasonChoice, setReasonChoice] = useState(REFUSAL_REASONS[0])
@@ -32,6 +44,8 @@ export function RespondActions({
   const accept = async () => {
     await action.mutateAsync({ id: transferId, action: 'accepte' })
     setAccepting(false)
+    // Célébration pour une acceptation critique (sauf reduced-motion).
+    if (severity === 'critique' && !reduce) celebrate()
     onDone?.()
   }
   const refuse = async () => {

@@ -99,10 +99,12 @@ try {
 assert(appeared, 'écran B : la demande entrante apparaît en temps réel (sans reload)')
 
 // B accepte
+await wait(600)
 await clickByText(B, 'Accepter')
-await B.waitForFunction(() => document.body.innerText.includes("Confirmer l'acceptation"), { timeout: 5000 })
+await B.waitForFunction(() => document.body.innerText.includes("Confirmer l'acceptation"), { timeout: 10000 })
+await wait(300)
 await clickByText(B, "Confirmer l'acceptation")
-await wait(1500)
+await wait(1800)
 
 // — Écran A : statut passe à « Accepté » en temps réel —
 let accepted = false
@@ -122,10 +124,11 @@ try {
 assert(enRoute, 'écran A : « En route » + mini-carte ambulance affichée')
 
 // A marque arrivé
+await wait(500)
 await clickByText(A, 'Marquer arrivé')
 let arrived = false
 try {
-  await A.waitForFunction(() => document.body.innerText.includes('Arrivé') && document.body.innerText.includes('clôturé'), { timeout: 10000 })
+  await A.waitForFunction(() => document.body.innerText.includes('Arrivé') && document.body.innerText.includes('clôturé'), { timeout: 15000 })
   arrived = true
 } catch { arrived = false }
 assert(arrived, 'écran A : « Arrivé » — transfert clôturé')

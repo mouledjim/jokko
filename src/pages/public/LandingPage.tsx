@@ -1,13 +1,14 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Eye, Send, Truck, ShieldCheck, Activity } from 'lucide-react'
+import { ArrowRight, Eye, Send, Truck, ShieldCheck, Activity, Sun, Moon } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { EcgLine } from '@/components/brand/EcgLine'
 import { useTheme } from '@/providers/ThemeProvider'
-import { Sun, Moon } from 'lucide-react'
 import { SenegalHero } from '@/components/landing/SenegalHero'
 import { HeartBeat, Lungs, EcgContinuous } from '@/components/landing/Anatomy'
-import { ScrollCounter } from '@/components/landing/ScrollCounter'
+import { NumberTicker } from '@/components/shadcn/number-ticker'
+import { ShimmerButton } from '@/components/shadcn/shimmer-button'
+import { Meteors } from '@/components/shadcn/meteors'
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -18,6 +19,7 @@ const fadeUp = {
 
 export default function LandingPage() {
   const { theme, toggle } = useTheme()
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-garde text-white">
       {/* En-tête */}
@@ -49,10 +51,10 @@ export default function LandingPage() {
             <motion.p {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }} className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-300">
               La carte nationale des lits disponibles et la coordination des transferts inter-hospitaliers, en temps réel — pour que chaque minute compte là où elle sauve.
             </motion.p>
-            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }} className="mt-8 flex flex-wrap gap-3">
-              <Link to="/login" className="inline-flex h-12 items-center gap-2 rounded-xl bg-bloc-clair px-6 text-[15px] font-semibold text-garde transition hover:bg-teal-300">
-                Voir la démo <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
+            <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }} className="mt-8 flex flex-wrap items-center gap-3">
+              <ShimmerButton onClick={() => navigate('/login')} shimmerColor="#5eead4" background="#0b5e59" className="h-12 px-6 text-[15px] font-semibold">
+                Voir la démo <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </ShimmerButton>
               <a href="#fonctionnement" className="inline-flex h-12 items-center gap-2 rounded-xl border border-white/15 px-6 text-[15px] font-semibold text-white transition hover:bg-white/5">
                 Découvrir
               </a>
@@ -79,7 +81,8 @@ export default function LandingPage() {
           ].map((c, i) => (
             <motion.div key={i} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.1 }} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
               <p className="font-display text-4xl font-semibold text-bloc-clair tabular-nums">
-                <ScrollCounter value={c.v} suffix={c.s} />
+                <NumberTicker value={c.v} className="text-bloc-clair" />
+                {c.s}
               </p>
               <p className="mt-2 text-[13px] leading-relaxed text-slate-400">{c.t}</p>
             </motion.div>
@@ -149,13 +152,16 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-4xl px-5 py-20 text-center">
-        <Activity className="mx-auto h-10 w-10 text-bloc-clair" aria-hidden />
-        <h2 className="mt-4 font-display text-3xl font-semibold">Prêt à voir Jokko Santé en action ?</h2>
-        <p className="mx-auto mt-3 max-w-md text-slate-400">Connectez-vous avec un compte de démonstration et jouez le scénario complet d'un transfert.</p>
-        <Link to="/login" className="mt-7 inline-flex h-12 items-center gap-2 rounded-xl bg-bloc-clair px-7 text-[15px] font-semibold text-garde transition hover:bg-teal-300">
-          Voir la démo <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
+      <section className="relative mx-auto max-w-4xl overflow-hidden px-5 py-20 text-center">
+        <Meteors number={18} className="opacity-40" />
+        <Activity className="relative mx-auto h-10 w-10 text-bloc-clair" aria-hidden />
+        <h2 className="relative mt-4 font-display text-3xl font-semibold">Prêt à voir Jokko Santé en action ?</h2>
+        <p className="relative mx-auto mt-3 max-w-md text-slate-400">Connectez-vous avec un compte de démonstration et jouez le scénario complet d'un transfert.</p>
+        <div className="relative mt-7 flex justify-center">
+          <ShimmerButton onClick={() => navigate('/login')} shimmerColor="#5eead4" background="#0b5e59" className="h-12 px-7 text-[15px] font-semibold">
+            Voir la démo <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+          </ShimmerButton>
+        </div>
       </section>
 
       {/* Footer */}

@@ -158,7 +158,7 @@ export default function TransferDetailPage() {
           <Card>
             <CardHeader title="Actions" />
             <CardBody className="space-y-2 pt-2">
-              {t.status === 'en_attente' && isTo && <RespondActions transferId={t.id} serviceName={t.specialty?.name ?? 'le service'} />}
+              {t.status === 'en_attente' && isTo && <RespondActions transferId={t.id} serviceName={t.specialty?.name ?? 'le service'} severity={t.severity} />}
               {t.status === 'en_attente' && isFrom && (
                 <Button variant="secondary" block onClick={() => action.mutate({ id: t.id, action: 'annule' })} loading={action.isPending}>Annuler la demande</Button>
               )}

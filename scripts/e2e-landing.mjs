@@ -42,7 +42,7 @@ await page.screenshot({ path: 'scripts/screenshots/landing-anatomy.png' })
 
 // Navigation "Voir la démo"
 await page.evaluate(() => window.scrollTo(0, 0))
-await page.evaluate(() => { const a = [...document.querySelectorAll('a')].find((x) => x.textContent.includes('Voir la démo')); a?.click() })
+await page.evaluate(() => { const el = [...document.querySelectorAll('a,button')].find((x) => x.textContent.includes('Voir la démo')); el?.click() })
 await page.waitForFunction(() => location.pathname === '/login', { timeout: 8000 }).catch(() => {})
 assert(await page.evaluate(() => location.pathname === '/login'), 'bouton « Voir la démo » mène à /login')
 

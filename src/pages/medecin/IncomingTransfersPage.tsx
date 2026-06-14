@@ -96,7 +96,7 @@ export default function IncomingTransfersPage() {
                   )}
 
                   <div className="mt-4">
-                    <RespondActions transferId={t.id} serviceName={t.specialty?.name ?? 'le service'} onDone={() => undefined} />
+                    <RespondActions transferId={t.id} serviceName={t.specialty?.name ?? 'le service'} severity={t.severity} onDone={() => undefined} />
                   </div>
                   <button onClick={() => navigate(`/app/transferts/${t.id}`)} className="mt-2 flex w-full items-center justify-center gap-1 text-[12px] font-medium text-slate-400 transition hover:text-bloc">
                     Voir le détail

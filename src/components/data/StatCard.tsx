@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Card } from '@/components/ui/Card'
-import { AnimatedNumber } from './AnimatedNumber'
+import { NumberTicker } from '@/components/shadcn/number-ticker'
 
 type Tone = 'bloc' | 'success' | 'warning' | 'danger' | 'neutral'
 
@@ -41,7 +41,7 @@ export function StatCard({
         )}
       </div>
       <p className="mt-2 font-display text-[28px] leading-none font-semibold tracking-tight text-slate-900 tabular-nums dark:text-white">
-        {typeof value === 'number' && animate ? <AnimatedNumber value={value} /> : value}
+        {typeof value === 'number' && animate ? <NumberTicker value={value} className="text-inherit" /> : value}
         {suffix && <span className="ml-1 text-lg text-slate-400">{suffix}</span>}
       </p>
       {hint && <p className="mt-2 text-[12px] text-slate-400">{hint}</p>}
