@@ -1,55 +1,33 @@
 import { motion } from 'framer-motion'
 import { EcgLine } from '@/components/brand/EcgLine'
+import { Img } from '@/components/landing/Img'
 
-/** Panneau visuel de la page de connexion (desktop). Fond sombre + ECG. */
+const DOC_LOGIN = 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1000&q=80'
+
+/** Panneau visuel de la page de connexion (desktop) : médecin + dégradé rouge. */
 export function LoginAside() {
-  const dots = [
-    { x: '22%', y: '32%', d: 0 },
-    { x: '64%', y: '24%', d: 0.6 },
-    { x: '48%', y: '54%', d: 1.2 },
-    { x: '74%', y: '64%', d: 0.3 },
-    { x: '32%', y: '72%', d: 0.9 },
-  ]
   return (
-    <div className="relative hidden overflow-hidden bg-garde lg:block lg:w-[54%]">
-      {/* Halo teal */}
-      <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-bloc/30 blur-[120px]" aria-hidden />
-      <div className="absolute bottom-0 left-0 h-80 w-80 rounded-full bg-bloc-clair/15 blur-[100px]" aria-hidden />
+    <div className="relative hidden overflow-hidden lg:block lg:w-[54%]">
+      <Img src={DOC_LOGIN} alt="Soignant" className="absolute inset-0 h-full w-full" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-rose-800/90 via-rose-700/75 to-rose-500/45" aria-hidden />
 
-      {/* Points hôpitaux qui pulsent */}
-      <div className="absolute inset-0" aria-hidden>
-        {dots.map((dot, i) => (
-          <span key={i} className="absolute" style={{ left: dot.x, top: dot.y }}>
-            <span className="relative flex h-3 w-3">
-              <motion.span
-                className="absolute inline-flex h-full w-full rounded-full bg-bloc-clair"
-                animate={{ scale: [1, 2.6, 1], opacity: [0.7, 0, 0.7] }}
-                transition={{ duration: 2.6, repeat: Infinity, delay: dot.d, ease: 'easeInOut' }}
-              />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-bloc-clair" />
-            </span>
-          </span>
-        ))}
-      </div>
-
-      <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
+      <div className="relative flex h-full flex-col justify-between p-12 xl:p-16 text-white">
         <div />
-        <div>
-          <EcgLine className="mb-8 h-12 w-48 text-bloc-clair" />
-          <h2 className="max-w-md font-display text-4xl leading-tight font-semibold tracking-tight text-white xl:text-[2.75rem]">
-            Trouver un lit ne devrait jamais prendre des heures.
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+          <EcgLine className="mb-8 h-12 w-48 text-white/90" />
+          <h2 className="max-w-md font-display text-4xl leading-tight font-bold tracking-tight xl:text-[2.75rem]">
+            Chaque minute compte. Donnons-les au patient.
           </h2>
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-300">
-            La carte nationale des lits disponibles et la coordination des transferts
-            inter-hospitaliers, en temps réel.
+          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-rose-50/90">
+            La carte nationale des lits et la coordination des transferts inter-hospitaliers, en temps réel.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center gap-6 text-slate-400">
+        <div className="flex items-center gap-6">
           <Stat value="15" label="établissements" />
-          <span className="h-8 w-px bg-white/10" aria-hidden />
+          <span className="h-8 w-px bg-white/25" aria-hidden />
           <Stat value="14" label="régions médicales" />
-          <span className="h-8 w-px bg-white/10" aria-hidden />
+          <span className="h-8 w-px bg-white/25" aria-hidden />
           <Stat value="< 2 s" label="mise à jour temps réel" />
         </div>
       </div>
@@ -60,8 +38,8 @@ export function LoginAside() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <p className="font-display text-2xl font-semibold tabular-nums text-bloc-clair">{value}</p>
-      <p className="text-xs text-slate-400">{label}</p>
+      <p className="font-display text-2xl font-bold tabular-nums text-white">{value}</p>
+      <p className="text-xs text-rose-100/80">{label}</p>
     </div>
   )
 }

@@ -1,14 +1,17 @@
-import { useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, useScroll, useTransform, useReducedMotion, type Variants } from 'framer-motion'
 import { ArrowRight, Eye, Send, Truck, ShieldCheck, Activity, HeartPulse, Stethoscope as StethoIcon } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { HeartBeat, Lungs, EcgContinuous } from '@/components/landing/Anatomy'
 import { Ambulance, Stethoscope, Ribcage } from '@/components/landing/LandingArt'
+import { Img } from '@/components/landing/Img'
 import { NumberTicker } from '@/components/shadcn/number-ticker'
 import { ShimmerButton } from '@/components/shadcn/shimmer-button'
 
 const RED = '#e11d48'
+const DOC_HERO = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=900&q=80'
+const DOC_BAND = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1600&q=80'
 
 function Reveal({ children, delay = 0, y = 28, className }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
   const variants: Variants = {
@@ -26,17 +29,20 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const reduce = useReducedMotion()
 
-  // Parallax doux du visuel héro
   const heroRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress: heroProg } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
-  const heroFloat = useTransform(heroProg, [0, 1], [0, reduce ? 0 : -60])
-  const heroFade = useTransform(heroProg, [0, 1], [1, 0.2])
+  const heroFloat = useTransform(heroProg, [0, 1], [0, reduce ? 0 : -50])
 
-  // Ambulance qui roule au scroll
-  const roadRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress: roadProg } = useScroll({ target: roadRef, offset: ['start end', 'end start'] })
-  const ambX = useTransform(roadProg, [0, 1], reduce ? ['40%', '40%'] : ['-12%', '88%'])
-  const dash = useTransform(roadProg, [0, 1], [0, -240])
+  // Ambulance qui roule en boucle (mesure de la largeur de la piste)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [trackW, setTrackW] = useState(900)
+  useEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setTrackW(e.contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   return (
     <div className="min-h-screen bg-white text-slate-800">
@@ -52,9 +58,13 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section ref={heroRef} className="relative overflow-hidden">
+        {/* Image médecin en fond très subtil */}
+        <Img src={DOC_BAND} alt="" className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.05]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/60 via-white/85 to-white" aria-hidden />
         <div className="pointer-events-none absolute -top-32 -right-24 h-[28rem] w-[28rem] rounded-full bg-rose-200/50 blur-[120px]" aria-hidden />
         <div className="pointer-events-none absolute top-40 -left-24 h-80 w-80 rounded-full bg-rose-100 blur-[100px]" aria-hidden />
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
+
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_1fr] lg:py-28">
           <div>
             <Reveal>
               <span className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-[12px] font-semibold text-rose-700">
@@ -84,25 +94,23 @@ export default function LandingPage() {
             </Reveal>
           </div>
 
-          {/* Visuel héro animé */}
-          <motion.div style={{ y: heroFloat, opacity: heroFade }} className="relative mx-auto w-full max-w-md">
-            <div className="relative aspect-square rounded-[2rem] border border-rose-100 bg-gradient-to-b from-rose-50/70 to-white shadow-[0_30px_80px_-30px_rgba(225,29,72,0.35)]">
-              <div className="absolute inset-0 grid place-items-center">
-                <HeartBeat className="h-56 w-56" />
-              </div>
-              <motion.div animate={reduce ? {} : { y: [0, -10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }} className="absolute top-6 left-6 rounded-2xl border border-rose-100 bg-white/90 p-3 shadow-md backdrop-blur">
-                <Stethoscope className="h-14 w-14" />
+          {/* Visuel : médecin réel + surcouches animées */}
+          <motion.div style={{ y: heroFloat }} className="relative mx-auto w-full max-w-sm">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-rose-100 shadow-[0_30px_80px_-30px_rgba(225,29,72,0.4)]">
+              <Img src={DOC_HERO} alt="Médecin avec stéthoscope" className="absolute inset-0 h-full w-full" />
+              <div className="absolute inset-0 bg-gradient-to-t from-rose-950/35 via-transparent to-transparent" aria-hidden />
+              <motion.div animate={reduce ? {} : { y: [0, -9, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }} className="absolute top-4 left-4 rounded-2xl border border-rose-100 bg-white/90 p-2.5 shadow-lg backdrop-blur">
+                <HeartBeat className="h-12 w-12" />
               </motion.div>
-              <motion.div animate={reduce ? {} : { y: [0, 12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} className="absolute right-5 bottom-16 rounded-2xl border border-rose-100 bg-white/90 p-3 shadow-md backdrop-blur">
-                <Lungs className="h-16 w-16" />
+              <motion.div animate={reduce ? {} : { y: [0, 8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} className="absolute top-4 right-4 rounded-2xl border border-rose-100 bg-white/90 p-2 shadow-lg backdrop-blur">
+                <Stethoscope className="h-11 w-11" />
               </motion.div>
-              <div className="absolute right-6 bottom-5 left-6 rounded-2xl border border-rose-100 bg-white/95 px-4 py-2.5 shadow-md">
-                <EcgContinuous className="h-9 w-full" />
+              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-rose-100 bg-white/92 px-3 py-2 shadow-lg backdrop-blur">
+                <EcgContinuous className="h-8 w-full" />
               </div>
             </div>
           </motion.div>
         </div>
-        <div className="mx-auto max-w-6xl px-5"><div className="h-px bg-gradient-to-r from-transparent via-rose-200 to-transparent" /></div>
       </section>
 
       {/* LE PROBLÈME */}
@@ -117,9 +125,7 @@ export default function LandingPage() {
           ].map((c, i) => (
             <Reveal key={i} delay={i * 0.1}>
               <div className="group rounded-3xl border border-rose-100 bg-white p-7 text-center shadow-sm transition hover:-translate-y-1 hover:border-rose-200 hover:shadow-xl hover:shadow-rose-600/10">
-                <p className="font-display text-5xl font-bold text-rose-600 tabular-nums">
-                  <NumberTicker value={c.v} className="text-rose-600" />{c.s}
-                </p>
+                <p className="font-display text-5xl font-bold text-rose-600 tabular-nums"><NumberTicker value={c.v} className="text-rose-600" />{c.s}</p>
                 <p className="mt-3 text-[14px] leading-relaxed text-slate-500">{c.t}</p>
               </div>
             </Reveal>
@@ -128,24 +134,43 @@ export default function LandingPage() {
         <p className="mt-6 text-center text-[11px] text-slate-400">Données illustratives.</p>
       </section>
 
+      {/* BANDEAU MÉDECINS */}
+      <section className="relative overflow-hidden">
+        <Img src={DOC_BAND} alt="Médecin au travail" className="absolute inset-0 h-full w-full" />
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-700/95 via-rose-600/85 to-rose-500/60" aria-hidden />
+        <div className="relative mx-auto max-w-5xl px-5 py-24 text-white">
+          <Reveal>
+            <p className="text-[13px] font-semibold tracking-widest text-rose-100 uppercase">Au service de ceux qui soignent</p>
+            <h2 className="mt-3 max-w-2xl font-display text-3xl leading-tight font-bold sm:text-4xl">Donner aux soignants les bonnes informations, au bon moment.</h2>
+            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-rose-50/90">Chaque seconde gagnée à la recherche d'un lit est une seconde rendue au patient. Jokko Santé met la technologie au service du geste qui sauve.</p>
+          </Reveal>
+          <div className="mt-9 flex flex-wrap gap-8">
+            {[{ v: 15, s: '', t: 'établissements connectés' }, { v: 14, s: '', t: 'régions médicales' }, { v: 2, s: ' s', t: 'pour propager une mise à jour' }].map((k, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <div><p className="font-display text-4xl font-bold tabular-nums"><NumberTicker value={k.v} className="text-white" />{k.s}</p><p className="text-[13px] text-rose-100/80">{k.t}</p></div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* HISTOIRE — L'AMBULANCE QUI ROULE */}
-      <section id="histoire" ref={roadRef} className="relative overflow-hidden border-y border-rose-100 bg-gradient-to-b from-rose-50/60 to-white py-24">
+      <section id="histoire" className="relative overflow-hidden border-y border-rose-100 bg-gradient-to-b from-rose-50/60 to-white py-24">
         <div className="mx-auto max-w-6xl px-5">
           <Reveal><h2 className="text-center font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Du téléphone… au temps réel</h2></Reveal>
-          <Reveal delay={0.05}><p className="mx-auto mt-3 max-w-xl text-center text-slate-500">Faites défiler : suivez le patient, de la demande à l'arrivée.</p></Reveal>
+          <Reveal delay={0.05}><p className="mx-auto mt-3 max-w-xl text-center text-slate-500">De la demande à l'arrivée, le patient est suivi à chaque étape.</p></Reveal>
 
-          {/* Scène route */}
-          <div className="relative mt-16 h-44">
-            {/* Hôpital départ */}
+          <div ref={trackRef} className="relative mt-16 h-44">
             <Marker label="Pikine" side="left" />
-            {/* Hôpital arrivée */}
             <Marker label="H. Principal" side="right" />
-            {/* Route */}
-            <div className="absolute inset-x-0 bottom-6 h-[3px] bg-rose-200">
-              <motion.div className="h-full w-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#e11d48 0 18px,transparent 18px 36px)', backgroundSize: '36px 100%', backgroundPositionX: dash }} />
+            <div className="absolute inset-x-0 bottom-6 h-[3px] overflow-hidden bg-rose-200">
+              <motion.div className="h-full w-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#e11d48 0 18px,transparent 18px 36px)', backgroundSize: '36px 100%' }} animate={reduce ? {} : { backgroundPositionX: ['0px', '-36px'] }} transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }} />
             </div>
-            {/* Ambulance */}
-            <motion.div style={{ x: ambX }} className="absolute bottom-3 left-0 w-40">
+            <motion.div
+              className="absolute bottom-3 left-0 w-40"
+              animate={reduce ? { x: trackW * 0.4 } : { x: [-40, trackW - 120] }}
+              transition={reduce ? {} : { duration: 7.5, repeat: Infinity, ease: 'linear' }}
+            >
               <Ambulance className="w-40 drop-shadow-lg" />
             </motion.div>
           </div>
@@ -157,7 +182,7 @@ export default function LandingPage() {
               { icon: Truck, t: "L'acceptation est tracée, l'ambulance suivie jusqu'à l'arrivée." },
             ].map((s, i) => (
               <Reveal key={i} delay={i * 0.12}>
-                <div className="flex items-start gap-3 rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
+                <div className="flex items-start gap-3 rounded-2xl border border-rose-100 bg-white p-5 shadow-sm transition hover:shadow-md">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-600"><s.icon className="h-5 w-5" /></span>
                   <p className="text-[14px] leading-relaxed text-slate-600">{s.t}</p>
                 </div>
@@ -167,11 +192,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CONÇU POUR LE CORPS MÉDICAL — galerie anatomique */}
+      {/* CONÇU POUR LE CORPS MÉDICAL */}
       <section className="mx-auto max-w-6xl px-5 py-24">
         <Reveal><h2 className="text-center font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Conçu pour le corps médical</h2></Reveal>
         <Reveal delay={0.05}><p className="mx-auto mt-3 max-w-xl text-center text-slate-500">Une exigence clinique, jusque dans le moindre détail.</p></Reveal>
-
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
             { art: <HeartBeat className="h-28 w-28" />, icon: HeartPulse, title: 'Cardiologie', text: 'Chaque minute compte : orientation immédiate vers le bon plateau technique.' },
@@ -211,7 +235,7 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute inset-0 mx-auto h-64 max-w-3xl rounded-full bg-rose-200/40 blur-[120px]" aria-hidden />
         <div className="relative mx-auto max-w-4xl px-5 py-24 text-center">
           <Reveal>
-            <span className="grid mx-auto h-14 w-14 place-items-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30"><HeartPulse className="h-7 w-7" /></span>
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-600/30"><HeartPulse className="h-7 w-7" /></span>
             <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Prêt à voir Jokko Santé en action ?</h2>
             <p className="mx-auto mt-3 max-w-md text-slate-500">Connectez-vous avec un compte de démonstration et jouez le scénario complet d'un transfert critique.</p>
             <div className="mt-8 flex justify-center">
