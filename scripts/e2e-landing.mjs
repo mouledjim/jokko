@@ -21,14 +21,16 @@ const h1 = await page.$eval('h1', (e) => e.textContent || '')
 assert(h1.includes('Trouver un lit'), `hero affiché ("${h1.slice(0, 40)}")`)
 
 const svgLabels = await page.$$eval('svg[aria-label]', (els) => els.map((e) => e.getAttribute('aria-label')))
-assert(svgLabels.some((l) => l?.includes('Sénégal')), 'carte du Sénégal présente')
+assert(svgLabels.some((l) => l?.includes('Ambulance')), 'ambulance présente')
 assert(svgLabels.some((l) => l?.includes('Cœur')), 'animation cœur présente')
 assert(svgLabels.some((l) => l?.includes('Poumons')), 'animation poumons présente')
 assert(svgLabels.some((l) => l?.includes('ECG')), 'animation ECG présente')
+assert(svgLabels.some((l) => l?.includes('Stéthoscope')), 'stéthoscope présent')
 
 const bodyText = await page.evaluate(() => document.body.innerText)
 assert(bodyText.includes('Le problème'), 'section problème présente')
-assert(bodyText.includes('Comment ça marche'), 'section fonctionnement présente')
+assert(bodyText.includes('temps réel'), 'section histoire (ambulance) présente')
+assert(bodyText.includes('corps médical'), 'galerie anatomique présente')
 assert(bodyText.includes('CDP'), 'positionnement / conformité CDP présent')
 
 const hasManifest = await page.$eval('link[rel="manifest"]', (e) => !!e.getAttribute('href')).catch(() => false)
