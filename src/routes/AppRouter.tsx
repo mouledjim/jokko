@@ -61,15 +61,41 @@ function PublicSuspense({ children }: { children: React.ReactNode }) {
   )
 }
 
+// Détection d'un domaine ou sous-domaine dédié aux donneurs (ex: don-jokko.vercel.app, jokko-donneur.vercel.app, ou ?espace=donneur)
+function isDonorDomain(): boolean {
+  if (typeof window === 'undefined') return false
+  const host = window.location.hostname.toLowerCase()
+  const search = window.location.search.toLowerCase()
+  return (
+    host.includes('donneur') ||
+    host.startsWith('don-') ||
+    host.startsWith('don.') ||
+    host.includes('sang') ||
+    search.includes('espace=donneur') ||
+    search.includes('view=donneur')
+  )
+}
+
 export function AppRouter() {
+  const isDonorSite = isDonorDomain()
+
   return (
     <Routes>
-      <Route path="/" element={<PublicSuspense><LandingPage /></PublicSuspense>} />
+      {/* Si l'utilisateur arrive via un domaine donneur, la racine affiche directement le portail donneur */}
+      <Route
+        path="/"
+        element={
+          <PublicSuspense>
+            {isDonorSite ? <DonneurLandingPage /> : <LandingPage />}
+          </PublicSuspense>
+        }
+      />
       <Route path="/login" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
       <Route path="/portail" element={<PublicSuspense><PortailPage /></PublicSuspense>} />
       <Route path="/acces" element={<PublicSuspense><PortailPage /></PublicSuspense>} />
       <Route path="/donneur" element={<PublicSuspense><DonneurLandingPage /></PublicSuspense>} />
       <Route path="/donneur/urgences" element={<PublicSuspense><DonneurPage /></PublicSuspense>} />
+      <Route path="/urgences" element={<PublicSuspense><DonneurPage /></PublicSuspense>} />
       <Route path="/acces-refuse" element={<PublicSuspense><AccessDeniedPage /></PublicSuspense>} />
 
       {/* Raccourcis d'accès direct par type d'utilisateur */}
