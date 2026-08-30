@@ -8,10 +8,14 @@ import { EcgLoader } from '@/components/brand/EcgLine'
 // Pages publiques et pages d'espace, chargées à la demande (code splitting).
 const LandingPage = lazy(() => import('@/pages/public/LandingPage'))
 const LoginPage = lazy(() => import('@/pages/public/LoginPage'))
+const PortailPage = lazy(() => import('@/pages/public/PortailPage'))
+const DonneurLandingPage = lazy(() => import('@/pages/public/DonneurLandingPage'))
+const DonneurPage = lazy(() => import('@/pages/public/DonneurPage'))
 const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage'))
 const AccessDeniedPage = lazy(() => import('@/pages/public/AccessDeniedPage'))
 
 const MedecinDashboard = lazy(() => import('@/pages/medecin/MedecinDashboard'))
+const BloodUrgencyPage = lazy(() => import('@/pages/medecin/BloodUrgencyPage'))
 const MapPage = lazy(() => import('@/pages/medecin/MapPage'))
 const MyBedsPage = lazy(() => import('@/pages/medecin/MyBedsPage'))
 const NewTransferPage = lazy(() => import('@/pages/medecin/NewTransferPage'))
@@ -39,6 +43,7 @@ const NationalFacilitiesPage = lazy(() => import('@/pages/national/NationalFacil
 const NationalUsersPage = lazy(() => import('@/pages/national/NationalUsersPage'))
 const NationalRegionsPage = lazy(() => import('@/pages/national/NationalRegionsPage'))
 const AuditPage = lazy(() => import('@/pages/national/AuditPage'))
+const CntsNationalPage = lazy(() => import('@/pages/national/CntsNationalPage'))
 const InteropPage = lazy(() => import('@/pages/national/InteropPage'))
 const NationalSettingsPage = lazy(() => import('@/pages/national/NationalSettingsPage'))
 
@@ -61,7 +66,17 @@ export function AppRouter() {
     <Routes>
       <Route path="/" element={<PublicSuspense><LandingPage /></PublicSuspense>} />
       <Route path="/login" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
+      <Route path="/portail" element={<PublicSuspense><PortailPage /></PublicSuspense>} />
+      <Route path="/acces" element={<PublicSuspense><PortailPage /></PublicSuspense>} />
+      <Route path="/donneur" element={<PublicSuspense><DonneurLandingPage /></PublicSuspense>} />
+      <Route path="/donneur/urgences" element={<PublicSuspense><DonneurPage /></PublicSuspense>} />
       <Route path="/acces-refuse" element={<PublicSuspense><AccessDeniedPage /></PublicSuspense>} />
+
+      {/* Raccourcis d'accès direct par type d'utilisateur */}
+      <Route path="/medecin" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
+      <Route path="/admin-hopital" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
+      <Route path="/admin-regional" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
+      <Route path="/msas" element={<PublicSuspense><LoginPage /></PublicSuspense>} />
 
       <Route element={<RequireAuth />}>
         {/* Espace médecin (et admin hôpital pour les pages opérationnelles partagées) */}
@@ -69,6 +84,7 @@ export function AppRouter() {
           <Route path="/app" element={<AppShell />}>
             <Route index element={<MedecinDashboard />} />
             <Route path="carte" element={<MapPage />} />
+            <Route path="sang" element={<BloodUrgencyPage />} />
             <Route path="entrants" element={<IncomingTransfersPage />} />
             <Route path="transferts" element={<MyTransfersPage />} />
             <Route path="transferts/nouveau" element={<NewTransferPage />} />
@@ -110,6 +126,7 @@ export function AppRouter() {
           <Route path="/national" element={<AppShell />}>
             <Route index element={<NationalDashboard />} />
             <Route path="carte" element={<NationalMapPage />} />
+            <Route path="cnts" element={<CntsNationalPage />} />
             <Route path="transferts" element={<NationalTransfersPage />} />
             <Route path="transferts/:id" element={<TransferDetailPage />} />
             <Route path="stats" element={<NationalStatsPage />} />

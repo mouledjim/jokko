@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { EcgLine } from '@/components/brand/EcgLine'
 import { Img } from '@/components/landing/Img'
 
-const DOC_LOGIN = 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1000&q=80'
+const DOC_LOGIN = '/images/doctor.jpg'
 
 /** Panneau visuel de la page de connexion (desktop) : médecin + dégradé rouge. */
 export function LoginAside() {

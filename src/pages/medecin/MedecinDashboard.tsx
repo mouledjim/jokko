@@ -41,7 +41,7 @@ export default function MedecinDashboard() {
   return (
     <div>
       <PageHeader
-        title={`Bonjour, ${profile?.first_name} 👋`}
+        title={`Bonjour, ${profile?.first_name || 'Docteur'}`}
         subtitle={facility ? facility.name : 'Espace médecin'}
       />
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion, useScroll, useTransform, useReducedMotion, type Variants } from 'framer-motion'
-import { ArrowRight, Eye, Send, Truck, ShieldCheck, Activity, HeartPulse, Stethoscope as StethoIcon } from 'lucide-react'
+import { motion, useScroll, useTransform, useReducedMotion, useInView, type Variants } from 'framer-motion'
+import { ArrowRight, Eye, Send, Truck, ShieldCheck, Activity, HeartPulse, Stethoscope as StethoIcon, Droplet, Heart } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { HeartBeat, Lungs, EcgContinuous } from '@/components/landing/Anatomy'
 import { Ambulance, Stethoscope, Ribcage } from '@/components/landing/LandingArt'
@@ -10,8 +10,8 @@ import { NumberTicker } from '@/components/shadcn/number-ticker'
 import { ShimmerButton } from '@/components/shadcn/shimmer-button'
 
 const RED = '#e11d48'
-const DOC_HERO = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=900&q=80'
-const DOC_BAND = 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1600&q=80'
+const DOC_HERO = '/images/doctor.jpg'
+const DOC_BAND = '/images/dispatch-center.jpg'
 
 function Reveal({ children, delay = 0, y = 28, className }: { children: ReactNode; delay?: number; y?: number; className?: string }) {
   const variants: Variants = {
@@ -33,9 +33,11 @@ export default function LandingPage() {
   const { scrollYProgress: heroProg } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const heroFloat = useTransform(heroProg, [0, 1], [0, reduce ? 0 : -50])
 
-  // Ambulance qui roule en boucle (mesure de la largeur de la piste)
+  // Ambulance : démarre uniquement quand la section est visible
+  const sectionRef = useRef<HTMLElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const [trackW, setTrackW] = useState(900)
+  const ambulanceInView = useInView(sectionRef, { margin: '-80px 0px' })
   useEffect(() => {
     const el = trackRef.current
     if (!el) return
@@ -50,9 +52,18 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-rose-100/80 bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Logo textClassName="text-slate-900" />
-          <Link to="/login" className="inline-flex h-9 items-center gap-1.5 rounded-full bg-rose-600 px-5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-rose-700">
-            Se connecter
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/donneur"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-4 text-[13px] font-bold text-red-700 shadow-sm transition hover:bg-red-100"
+            >
+              <Droplet className="h-3.5 w-3.5 fill-red-600 text-red-600" />
+              Espace Donneur Citoyen
+            </Link>
+            <Link to="/login" className="inline-flex h-9 items-center gap-1.5 rounded-full bg-rose-600 px-5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-rose-700">
+              Se connecter
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -85,9 +96,16 @@ export default function LandingPage() {
             <Reveal delay={0.18}>
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <ShimmerButton onClick={() => navigate('/login')} shimmerColor="#fecdd3" background={RED} className="h-12 px-7 text-[15px] font-semibold shadow-lg shadow-rose-600/20">
-                  Voir la démo <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+                  Espace Hôpitaux <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
                 </ShimmerButton>
-                <a href="#histoire" className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-200 px-6 text-[15px] font-semibold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50">
+                <Link
+                  to="/donneur"
+                  className="inline-flex h-12 items-center gap-2 rounded-full border-2 border-red-200 bg-red-50/90 px-6 text-[15px] font-bold text-red-700 transition hover:bg-red-100 shadow-sm"
+                >
+                  <Droplet className="h-4 w-4 fill-red-600 text-red-600" />
+                  App Don de Sang Citoyen
+                </Link>
+                <a href="#histoire" className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-200 px-5 text-[14px] font-semibold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50">
                   Découvrir
                 </a>
               </div>
@@ -155,7 +173,7 @@ export default function LandingPage() {
       </section>
 
       {/* HISTOIRE — L'AMBULANCE QUI ROULE */}
-      <section id="histoire" className="relative overflow-hidden border-y border-rose-100 bg-gradient-to-b from-rose-50/60 to-white py-24">
+      <section ref={sectionRef} id="histoire" className="relative overflow-hidden border-y border-rose-100 bg-gradient-to-b from-rose-50/60 to-white py-24">
         <div className="mx-auto max-w-6xl px-5">
           <Reveal><h2 className="text-center font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Du téléphone… au temps réel</h2></Reveal>
           <Reveal delay={0.05}><p className="mx-auto mt-3 max-w-xl text-center text-slate-500">De la demande à l'arrivée, le patient est suivi à chaque étape.</p></Reveal>
@@ -164,12 +182,12 @@ export default function LandingPage() {
             <Marker label="Pikine" side="left" />
             <Marker label="H. Principal" side="right" />
             <div className="absolute inset-x-0 bottom-6 h-[3px] overflow-hidden bg-rose-200">
-              <motion.div className="h-full w-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#e11d48 0 18px,transparent 18px 36px)', backgroundSize: '36px 100%' }} animate={reduce ? {} : { backgroundPositionX: ['0px', '-36px'] }} transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }} />
+              <motion.div className="h-full w-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#e11d48 0 18px,transparent 18px 36px)', backgroundSize: '36px 100%' }} animate={reduce || !ambulanceInView ? {} : { backgroundPositionX: ['0px', '-36px'] }} transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }} />
             </div>
             <motion.div
               className="absolute bottom-3 left-0 w-40"
-              animate={reduce ? { x: trackW * 0.4 } : { x: [-40, trackW - 120] }}
-              transition={reduce ? {} : { duration: 7.5, repeat: Infinity, ease: 'linear' }}
+              animate={reduce ? { x: trackW * 0.4 } : ambulanceInView ? { x: [-40, trackW - 120] } : { x: -40 }}
+              transition={reduce || !ambulanceInView ? { duration: 0 } : { duration: 7.5, repeat: Infinity, ease: 'linear' }}
             >
               <Ambulance className="w-40 drop-shadow-lg" />
             </motion.div>
@@ -227,6 +245,55 @@ export default function LandingPage() {
               ))}
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* SECTION DON DE SANG & CNTS */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-red-700 via-rose-600 to-red-800 p-8 sm:p-12 text-white shadow-2xl shadow-red-600/20">
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold backdrop-blur-md">
+                <Droplet className="h-3.5 w-3.5 fill-white text-white" />
+                Nouveau · Module Urgences Transfusionnelles & CNTS
+              </span>
+              <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold tracking-tight">
+                Mobiliser les donneurs de sang en temps réel, partout au Sénégal.
+              </h2>
+              <p className="mt-4 text-sm sm:text-base text-red-100/90 leading-relaxed">
+                Quand un bloc opératoire ou une maternité manque de poches de sang (O-, A+, B-…), l'hôpital lance une alerte ciblée. Les citoyens donneurs reçoivent la notification instantanée, confirment leur venue et reçoivent un pass d'accès prioritaire.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/donneur"
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-sm font-bold text-red-700 shadow-lg transition hover:bg-red-50"
+                >
+                  <Heart className="h-4 w-4 fill-red-600 text-red-600" />
+                  Tester l'App Citoyenne (/donneur)
+                </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-white/30 px-6 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/10"
+                >
+                  Espace Hôpital & CNTS
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              {[
+                { n: '< 2 s', t: 'Diffusion temps réel des alertes sang' },
+                { n: '100%', t: 'Compatibilité des groupes ABO / Rhésus' },
+                { n: '14', t: 'Régions médicales connectées au CNTS' },
+                { n: 'Pass QR', t: 'Code prioritaire remis au donneur' },
+              ].map((b, i) => (
+                <div key={i} className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-4 sm:p-5 text-center">
+                  <p className="font-display text-2xl sm:text-3xl font-black">{b.n}</p>
+                  <p className="mt-1 text-xs text-red-100/80">{b.t}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

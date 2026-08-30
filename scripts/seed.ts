@@ -104,6 +104,9 @@ async function count(table: string): Promise<number> {
 async function wipe() {
   console.log('→ Nettoyage des données existantes…')
   for (const t of [
+    'donor_commitments',
+    'blood_alerts',
+    'blood_stocks',
     'transfer_events',
     'transfer_requests',
     'notifications',
@@ -647,6 +650,68 @@ async function main() {
   }
   await insertRows('audit_logs', auditInserts)
 
+  // ——— Module Don de Sang & CNTS ———
+  console.log('→ Réserves de sang et alertes transfusionnelles…')
+  const bloodGroups = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
+  const stockInserts = []
+  for (const f of facilityRows) {
+    for (const bg of bloodGroups) {
+      const isCritical = bg === 'O-' || (bg === 'B-' && String(f.name).includes('Fann'))
+      stockInserts.push({
+        facility_id: f.id,
+        blood_group: bg,
+        quantity_bags: isCritical ? randInt(0, 2) : randInt(4, 18),
+        minimum_threshold: bg === 'O-' ? 6 : randInt(3, 8),
+        updated_at: new Date().toISOString(),
+      })
+    }
+  }
+  await insertRows('blood_stocks', stockInserts)
+
+  const principalId = facilityIdBySlug['principal']
+  const fannId = facilityIdBySlug['fann']
+  const dalalId = facilityIdBySlug['dalal-jamm']
+
+  const alertInserts = [
+    {
+      facility_id: principalId,
+      blood_group: 'O-',
+      urgency: 'vital',
+      bags_needed: 4,
+      bags_collected: 1,
+      clinical_reason: 'Urgence Vitale · Bloc opératoire maternité (Hémorragie sévère de la délivrance)',
+      status: 'active',
+      donors_en_route: 1,
+      created_at: new Date(now - 25 * 60_000).toISOString(),
+      expires_at: new Date(now + 180 * 60_000).toISOString(),
+    },
+    {
+      facility_id: fannId,
+      blood_group: 'B-',
+      urgency: 'urgent',
+      bags_needed: 3,
+      bags_collected: 0,
+      clinical_reason: 'Polytraumatisme de la route · Réanimation chirurgicale',
+      status: 'active',
+      donors_en_route: 2,
+      created_at: new Date(now - 50 * 60_000).toISOString(),
+      expires_at: new Date(now + 240 * 60_000).toISOString(),
+    },
+    {
+      facility_id: dalalId,
+      blood_group: 'AB-',
+      urgency: 'urgent',
+      bags_needed: 2,
+      bags_collected: 0,
+      clinical_reason: 'Prise en charge hématologie pédiatrique',
+      status: 'active',
+      donors_en_route: 0,
+      created_at: new Date(now - 75 * 60_000).toISOString(),
+      expires_at: new Date(now + 300 * 60_000).toISOString(),
+    },
+  ]
+  await insertRows('blood_alerts', alertInserts)
+
   // ——— Vérification de l'invariant du scénario jury ———
   const { data: reaCheck } = await supabase
     .from('v_service_availability')
@@ -668,6 +733,8 @@ async function main() {
     'transfer_events',
     'notifications',
     'audit_logs',
+    'blood_stocks',
+    'blood_alerts',
   ]) {
     console.log(`  ${t.padEnd(20)} : ${await count(t)}`)
   }

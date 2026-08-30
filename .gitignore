@@ -17,3 +17,5 @@ Thumbs.db
 *.log
 .vscode/*
 !.vscode/extensions.json
+
+.vercel

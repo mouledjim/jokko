@@ -12,6 +12,7 @@ import {
   FileClock,
   Settings,
   Webhook,
+  Droplet,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { UserRole } from '@/types/db'
@@ -35,6 +36,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
       items: [
         { label: 'Tableau de bord', to: '/app', icon: LayoutDashboard, end: true },
         { label: 'Carte des lits', to: '/app/carte', icon: Map },
+        { label: 'Banque de sang & Urgences', to: '/app/sang', icon: Droplet },
         { label: 'Transferts entrants', to: '/app/entrants', icon: Inbox },
         { label: 'Mes transferts', to: '/app/transferts', icon: ArrowRightLeft },
         { label: 'Lits de mon service', to: '/app/lits', icon: BedDouble },
@@ -48,6 +50,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
       items: [
         { label: 'Tableau de bord', to: '/admin', icon: LayoutDashboard, end: true },
         { label: 'Carte des lits', to: '/app/carte', icon: Map },
+        { label: 'Banque de sang & Alertes', to: '/app/sang', icon: Droplet },
         { label: 'Transferts entrants', to: '/app/entrants', icon: Inbox },
         { label: 'Transferts', to: '/admin/transferts', icon: ArrowRightLeft },
         { label: 'Notifications', to: '/app/notifications', icon: Bell },
@@ -80,6 +83,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavSection[]> = {
       items: [
         { label: 'Tableau de bord', to: '/national', icon: LayoutDashboard, end: true },
         { label: 'Carte nationale', to: '/national/carte', icon: Map },
+        { label: 'CNTS · Don de Sang', to: '/national/cnts', icon: Droplet },
         { label: 'Tous les transferts', to: '/national/transferts', icon: ArrowRightLeft },
         { label: 'Statistiques', to: '/national/stats', icon: ChartColumn },
         { label: "Journal d'audit", to: '/national/audit', icon: FileClock },

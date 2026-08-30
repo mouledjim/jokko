@@ -19,11 +19,11 @@ export function Img({
       <img
         src={src}
         alt={alt}
-        loading="lazy"
+        loading="eager"
         decoding="async"
         onLoad={() => setLoaded(true)}
         className={cn(
-          'h-full w-full object-cover transition-all duration-[900ms] ease-out will-change-transform',
+          'h-full w-full object-cover transition-all duration-[400ms] ease-out will-change-transform',
           loaded ? 'scale-100 opacity-100 blur-0' : 'scale-[1.06] opacity-0 blur-md',
           imgClassName,
         )}
